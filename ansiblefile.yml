@@ -1,18 +1,25 @@
-- name: Stop and remove old container (if running)
-  community.docker.docker_container:
-    name: webapp
-    state: absent
-    force_kill: true
+---
+- name: Deploy Docker Container on Remote Server
+  hosts: all
+  become: yes
 
-- name: Load Docker image from tar
-  community.docker.docker_image:
-    load_path: /tmp/webapp.tar
+  tasks:
+    - name: Stop and remove old container (if running)
+      community.docker.docker_container:
+        name: webapp
+        state: absent
+        force_kill: true
 
-- name: Run container from image
-  community.docker.docker_container:
-    name: webapp
-    image: local/webapp:v1
-    state: started
-    ports:
-      - "80:80"
+    - name: Load Docker image from tar
+      community.docker.docker_image:
+        load_path: /tmp/webapp.tar
+
+    - name: Run container from image
+      community.docker.docker_container:
+        name: webapp
+        image: local/webapp:v1
+        state: started
+        ports:
+          - "80:80"
+
 
