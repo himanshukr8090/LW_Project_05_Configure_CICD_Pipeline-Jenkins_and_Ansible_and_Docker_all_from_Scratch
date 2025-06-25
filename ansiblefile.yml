@@ -13,6 +13,7 @@
     - name: Load Docker image from tar
       community.docker.docker_image:
         name: local/webapp:v1
+        source: load
         load_path: /tmp/webapp.tar
 
     - name: Run container from image
