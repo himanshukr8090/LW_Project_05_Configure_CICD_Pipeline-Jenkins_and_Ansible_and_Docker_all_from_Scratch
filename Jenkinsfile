@@ -2,17 +2,18 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "local/app"
+        IMAGE_NAME = "local/webapp"
         IMAGE_TAG = "v1"
-        IMAGE_FILE = "app_image.tar"
-        REMOTE_USER = "ubuntu"
-        REMOTE_HOST = "your.server.ip"
+        IMAGE_FILE = "webapp.tar"
+        REMOTE_USER = "ec2-user"
+        REMOTE_HOST = "13.233.159.43"
+        PEM_PATH = "/var/lib/jenkins/.ssh/LW-Projects.pem"
     }
 
     stages {
         stage('Clone Repo') {
             steps {
-                git 'https://github.com/your-user/your-repo.git'
+                git 'https://github.com/himanshukr8090/LW_Project_05_Configure_CICD_Pipeline-Jenkins_and_Ansible_and_Docker_all_from_Scratch.git'
             }
         }
 
@@ -30,13 +31,18 @@ pipeline {
 
         stage('Copy Image to Remote') {
             steps {
-                sh "scp /tmp/${IMAGE_FILE} ${REMOTE_USER}@${REMOTE_HOST}:/tmp/"
+                sh """
+                    scp -i ${PEM_PATH} -o StrictHostKeyChecking=no /tmp/${IMAGE_FILE} ${REMOTE_USER}@${REMOTE_HOST}:/tmp/
+                """
             }
         }
 
         stage('Run Ansible Playbook') {
             steps {
-                sh "ansible-playbook ansible/deploy.yml -i ${REMOTE_HOST}, -u ${REMOTE_USER} --private-key ~/.ssh/id_rsa"
+                sh """
+                    ansible-playbook ansiblefile.yml -i ${REMOTE_HOST}, -u ${REMOTE_USER} \
+                    --private-key ${PEM_PATH} --ssh-extra-args='-o StrictHostKeyChecking=no'
+                """
             }
         }
     }
